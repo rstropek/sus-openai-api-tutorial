@@ -1,0 +1,113 @@
+# ================================================================================================
+# For details about the OpenAI REST API see https://platform.openai.com/docs/api-reference
+# ================================================================================================
+
+@openai_host = https://api.openai.com/v1/chat
+
+# List of API versions see https://learn.microsoft.com/en-us/azure/ai-services/openai/reference
+@azure_api_version = 2023-12-01-preview
+
+@system_prompt = Du bist ein Assistent, der SchülerInnen hilft, festzustellen, ob unsere Schule die richtige für sie ist. Wenn ja hilfst du, auszuwählen, welche Abteilung für sie interessant ist. Zur Auwahl stehen:\\n\\n* Informatik - Schwerpunkt auf client- und serverseitige Softwareentwicklung, Unterricht mehrerer Full-Stack Plattformen, Systemprogrammierung, Datenbanken, technisches Projektmanagement\\n* Elektronik - Schwerpunkt auf Mechanik, Elektrotechnik, Halbleiterproduktion, Funktechnik, Systemprogrammierung\\n* Medientechnik - Schwerpunkte Medienproduktion, Web Development, App-Entwicklung, Grundlagen Softwareentwicklung\\n\\nIn allen Abteilungen MUSS man Interesse an technischen Fragestellungen haben und DARF KEINE Abneigung gegenüber Mathematik, Physik, Logik & Co haben. In allen Abteilungen MUSS man auf jeden Fall gerne programmieren lernen wollen. Falls das nicht zutrifft, erkläre, dass unsere Schule möglicherweise die falsche Ausbildungsrichtung ist.\\n\\nDie SchülerInnen sind zwischen 12 und 14 Jahren alt und haben noch keine technische Erfahrung in den genannten Bereichen. Vermeide daher technische Fachbegriffe. Halte die Antworten kurz und prägant. Die Antwort darf KEINE Zeilenumbrüche enthalten. Stelle Fragen bis du dein Eindruck hast, eine Empfehlung abgeben zu können.
+
+@openai_model = gpt-4-1106-preview
+
+###
+# Send a chat completion request
+# For details see https://platform.openai.com/docs/api-reference/chat/create
+# For details about authentication see https://platform.openai.com/docs/api-reference/authentication
+# List of models for completions endpoint see https://platform.openai.com/docs/models/model-endpoint-compatibility
+# @name initial_user_message
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Hallo! Ich interessiere mich für eure Schule, weil ich schon ein wenig mit Scratch programmiert habe und mir das großen Spaß macht. Ich bin aber unsicher, welche Abteilung die richtige für mich ist."
+    }
+  ]
+}
+
+###
+# API requests to OpenAI models deployed in Microsoft Azure look very similar to the
+# requests to the OpenAI API. NOTE that we use key-based authentication here. However,
+# in real-world applications, you should at least consider using Azure Active Directory
+# for authentication, if possible Managed Identity. In this course, we focus on the
+# OpenAI API, so we use key-based authentication here to keep things simple.
+#
+# Note the additional fields in Azure's response regarding content security.
+POST {{$dotenv OPENAI_AZURE_ENDPOINT}}/openai/deployments/{{$dotenv OPENAI_AZURE_DEPLOYMENT}}/chat/completions?api-version={{azure_api_version}}
+Content-Type: application/json; charset=utf-8
+api-key: {{$dotenv OPENAI_AZURE_KEY}}
+
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Hallo! Ich interessiere mich für eure Schule, weil ich schon ein wenig mit Scratch programmiert habe und mir das großen Spaß macht. Ich bin aber unsicher, welche Abteilung die richtige für mich ist."
+    }
+  ],
+  "max_tokens": 4096
+}
+
+###
+# Send the answer of the user
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Hallo! Ich interessiere mich für eure Schule, weil ich schon ein wenig mit Scratch programmiert habe und mir das großen Spaß macht. Ich bin aber unsicher, welche Abteilung die richtige für mich ist."
+    },
+    {
+      "role": "assistant",
+      "content": "{{initial_user_message.response.body.$.choices[0].message.content}}"
+    },
+    {
+      "role": "user",
+      "content": "Am meisten macht mir das Gestalten von Spielen Spaß. Ich erstelle Figuren und Hintergründe und eine Freundin von mir programmiert dann die Spiellogik."
+    }
+  ]
+}
+
+###
+# Demonstrate how to enforce answering in JSON format
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "Extrahiere die gewünschte Abteilung und das gewünschte Datum für die Teilnahme an einem Schnuppertag aus der Nachricht. Antworte mit JSON im Format {\"department\": \"<Informatik | Elektronik | Medientechnik>\", \"date\": \"<Datum im ISO 8901 Format>\"}."
+    },
+    {
+      "role": "user",
+      "content": "Ich würde gerne am 27. Januar 24 zum Schnuppertag für Informatik kommen."
+    }
+  ],
+  "response_format": {
+    "type": "json_object"
+  }
+}

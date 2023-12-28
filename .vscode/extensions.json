@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "humao.rest-client",
+        "ms-dotnettools.csdevkit",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "dotenv.dotenv-vscode",
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig"
+    ]
+}
