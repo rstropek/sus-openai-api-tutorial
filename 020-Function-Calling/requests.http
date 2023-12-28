@@ -1,0 +1,252 @@
+# ================================================================================================
+# For details about the OpenAI REST API see https://platform.openai.com/docs/api-reference
+# ================================================================================================
+
+@openai_host = https://api.openai.com/v1/chat
+
+@system_prompt = Du bist ein Assistent, der SchülerInnen hilft, festzustellen, ob unsere Schule die richtige für sie ist. Du kannst Fragen über die unterrichteten Gegenstände, insbesondere über die Anzahl an Wochenstunden pro Jahrgang (1 bis 5) beantworten.
+
+@openai_model = gpt-4-1106-preview
+
+###
+# We can provide a list of functions that the assistant can use as "tools". The assistant will tell the
+# host program to call these functions on its behalf. The host program is responsible for implementing
+# these functions and returning the results to the assistant.
+#
+# This first example is a simple one. It offers one function without parameters.
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Ich habe gehört, es gibt viele Fächer an der Schule, die etwas mit Computern oder Programmieren zu tun haben. Welche sind das?"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "getUnterrichtsfaecher",
+        "description": "Liefert eine Liste der Fächer, die an der Schule unterrichtet werden."
+      }
+    }
+  ]
+}
+
+###
+# Let's simulate a result of the function call (based on data in stundentafel.json, which represents
+# the curriculum of a vocational college for computer science in Austria).
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Ich habe gehört, es gibt viele Fächer an der Schule, die etwas mit Computern oder Programmieren zu tun haben. Wie viele sind das?"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_cQ3mPM01GISDxBYoHyyDv99b",
+          "type": "function",
+          "function": {
+            "name": "getUnterrichtsfaecher",
+            "arguments": "{}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_cQ3mPM01GISDxBYoHyyDv99b",
+      "content": "[\"Religion\", \"Deutsch\", \"Englisch\", \"Geografie, Geschichte und Politische Bildung\", \"Wirtschaft und Recht\", \"Bewegung und Sport\", \"Angewandte Mathematik\", \"Naturwissenschaften\", \"Softwareentwicklung\", \"Informationstechnische Projekte\", \"Informationssysteme\", \"Systemtechnik\", \"Medientechnik\", \"Netzwerktechnik\", \"Computerpraktikum\"]"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "getUnterrichtsfaecher",
+        "description": "Liefert eine Liste der Fächer, die an der Schule unterrichtet werden."
+      }
+    }
+  ]
+}
+
+###
+# Now let's offer a more complex function with parameters. Additionally, the assistant will need
+# to call the function multiple times, once for each school year (1 to 5).
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Mathe ist mein Lieblingsfach. Wird es in allen fünf Jahrgängen unterrichtet?"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "getUnterrichtsstundenProWoche",
+        "description": "Liefert die Anzahl an Unterrichtsstunden pro Woche für ein bestimmtes Fach und einen bestimmten Jahrgang. Wenn das Ergebnis 0 ist, wird das Fach in diesem Jahrgang nicht unterrichtet.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "fach": {
+              "type": "string",
+              "description": "Der Name des Faches",
+              "enum": ["Religion", "Deutsch", "Englisch", "Geografie, Geschichte und Politische Bildung", "Wirtschaft und Recht", "Bewegung und Sport", "Angewandte Mathematik", "Naturwissenschaften", "Softwareentwicklung", "Informationstechnische Projekte", "Informationssysteme", "Systemtechnik", "Medientechnik", "Netzwerktechnik", "Computerpraktikum"]
+            },
+            "jahrgang": {
+              "type": "integer",
+              "description": "Der Jahrgang, für den die Anzahl an Unterrichtsstunden pro Woche ermittelt werden soll. Erlaubte Werte sind 1 bis 5."
+            }
+          },
+          "required": ["fach", "jahrgang"]
+        }
+      }
+    }
+  ]
+}
+
+###
+# Let's simulate a result of the function call (based on data in stundentafel.json, which represents
+# the curriculum of a vocational college for computer science in Austria).
+POST {{openai_host}}/completions
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+
+{
+  "model": "{{openai_model}}",
+  "messages": [
+    {
+      "role": "system",
+      "content": "{{system_prompt}}"
+    },
+    {
+      "role": "user",
+      "content": "Mathe ist mein Lieblingsfach. Wird es in allen fünf Jahrgängen unterrichtet?"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_ioyHAdKQbaoQgPBmijDscd25",
+          "type": "function",
+          "function": {
+            "name": "getUnterrichtsstundenProWoche",
+            "arguments": "{\"fach\": \"Angewandte Mathematik\", \"jahrgang\": 1}"
+          }
+        },
+        {
+          "id": "call_d0JLWlELlRD1vff7xCzbtPI6",
+          "type": "function",
+          "function": {
+            "name": "getUnterrichtsstundenProWoche",
+            "arguments": "{\"fach\": \"Angewandte Mathematik\", \"jahrgang\": 2}"
+          }
+        },
+        {
+          "id": "call_3rZSYfko3YD6PdSjP2SOCX0l",
+          "type": "function",
+          "function": {
+            "name": "getUnterrichtsstundenProWoche",
+            "arguments": "{\"fach\": \"Angewandte Mathematik\", \"jahrgang\": 3}"
+          }
+        },
+        {
+          "id": "call_xiaoHdRZPpMgexre1PxYusvj",
+          "type": "function",
+          "function": {
+            "name": "getUnterrichtsstundenProWoche",
+            "arguments": "{\"fach\": \"Angewandte Mathematik\", \"jahrgang\": 4}"
+          }
+        },
+        {
+          "id": "call_mlli0QS0f2tXZiQyFXHwyGRE",
+          "type": "function",
+          "function": {
+            "name": "getUnterrichtsstundenProWoche",
+            "arguments": "{\"fach\": \"Angewandte Mathematik\", \"jahrgang\": 5}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_ioyHAdKQbaoQgPBmijDscd25",
+      "content": "{ \"Stunden\": 4, \"Uebung\": 0 }"
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_d0JLWlELlRD1vff7xCzbtPI6",
+      "content": "{ \"Stunden\": 3, \"Uebung\": 0 }"
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_3rZSYfko3YD6PdSjP2SOCX0l",
+      "content": "{ \"Stunden\": 3, \"Uebung\": 0 }"
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_xiaoHdRZPpMgexre1PxYusvj",
+      "content": "{ \"Stunden\": 2, \"Uebung\": 0 }"
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_mlli0QS0f2tXZiQyFXHwyGRE",
+      "content": "{ \"Stunden\": 2, \"Uebung\": 0 }"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "getUnterrichtsstundenProWoche",
+        "description": "Liefert die Anzahl an Unterrichtsstunden pro Woche für ein bestimmtes Fach und einen bestimmten Jahrgang. Wenn das Ergebnis 0 ist, wird das Fach in diesem Jahrgang nicht unterrichtet.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "fach": {
+              "type": "string",
+              "description": "Der Name des Faches",
+              "enum": ["Religion", "Deutsch", "Englisch", "Geografie, Geschichte und Politische Bildung", "Wirtschaft und Recht", "Bewegung und Sport", "Angewandte Mathematik", "Naturwissenschaften", "Softwareentwicklung", "Informationstechnische Projekte", "Informationssysteme", "Systemtechnik", "Medientechnik", "Netzwerktechnik", "Computerpraktikum"]
+            },
+            "jahrgang": {
+              "type": "integer",
+              "description": "Der Jahrgang, für den die Anzahl an Unterrichtsstunden pro Woche ermittelt werden soll. Erlaubte Werte sind 1 bis 5."
+            }
+          },
+          "required": ["fach", "jahrgang"]
+        }
+      }
+    }
+  ]
+}

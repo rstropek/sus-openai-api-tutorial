@@ -1,0 +1,111 @@
+{
+  "Schultyp": "Höhere Lehranstalt für Informationstechnologie",
+  "Stundentafel": [
+    {
+      "Gegenstand": "Religion",
+      "JG 1": { "Stunden": 2, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 2, "Uebung": 0 },
+      "JG 4": { "Stunden": 2, "Uebung": 0 },
+      "JG 5": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Deutsch",
+      "JG 1": { "Stunden": 3, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 2, "Uebung": 0 },
+      "JG 4": { "Stunden": 2, "Uebung": 0 },
+      "JG 5": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Englisch",
+      "JG 1": { "Stunden": 2, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 2, "Uebung": 0 },
+      "JG 4": { "Stunden": 2, "Uebung": 0 },
+      "JG 5": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Geografie, Geschichte und Politische Bildung",
+      "JG 1": { "Stunden": 2, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 2, "Uebung": 0 },
+      "JG 4": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Wirtschaft und Recht",
+      "JG 4": { "Stunden": 3, "Uebung": 0 },
+      "JG 5": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Bewegung und Sport",
+      "JG 1": { "Stunden": 2, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 2, "Uebung": 0 },
+      "JG 4": { "Stunden": 1, "Uebung": 0 },
+      "JG 5": { "Stunden": 1, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Angewandte Mathematik",
+      "JG 1": { "Stunden": 4, "Uebung": 0 },
+      "JG 2": { "Stunden": 3, "Uebung": 0 },
+      "JG 3": { "Stunden": 3, "Uebung": 0 },
+      "JG 4": { "Stunden": 2, "Uebung": 0 },
+      "JG 5": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Naturwissenschaften",
+      "JG 1": { "Stunden": 3, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 2, "Uebung": 0 },
+      "JG 4": { "Stunden": 2, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Softwareentwicklung",
+      "JG 1": { "Stunden": 3, "Uebung": 2 },
+      "JG 2": { "Stunden": 3, "Uebung": 2 },
+      "JG 3": { "Stunden": 3, "Uebung": 2 },
+      "JG 4": { "Stunden": 3, "Uebung": 2 },
+      "JG 5": { "Stunden": 2, "Uebung": 2 }
+    },
+    {
+      "Gegenstand": "Informationstechnische Projekte",
+      "JG 2": { "Stunden": 2, "Uebung": 0 },
+      "JG 3": { "Stunden": 5, "Uebung": 1 },
+      "JG 4": { "Stunden": 6, "Uebung": 4 },
+      "JG 5": { "Stunden": 6, "Uebung": 4 }
+    },
+    {
+      "Gegenstand": "Informationssysteme",
+      "JG 3": { "Stunden": 3, "Uebung": 1 },
+      "JG 4": { "Stunden": 5, "Uebung": 2 },
+      "JG 5": { "Stunden": 4, "Uebung": 2 }
+    },
+    {
+      "Gegenstand": "Systemtechnik",
+      "JG 1": { "Stunden": 4, "Uebung": 2 },
+      "JG 2": { "Stunden": 6, "Uebung": 0 },
+      "JG 3": { "Stunden": 5, "Uebung": 3 },
+      "JG 4": { "Stunden": 6, "Uebung": 4 },
+      "JG 5": { "Stunden": 10, "Uebung": 6 }
+    },
+    {
+      "Gegenstand": "Medientechnik",
+      "JG 1": { "Stunden": 2, "Uebung": 2 },
+      "JG 2": { "Stunden": 2, "Uebung": 1 },
+      "JG 3": { "Stunden": 2, "Uebung": 2 }
+    },
+    {
+      "Gegenstand": "Netzwerktechnik",
+      "JG 1": { "Stunden": 2, "Uebung": 0 },
+      "JG 2": { "Stunden": 2, "Uebung": 1 },
+      "JG 3": { "Stunden": 3, "Uebung": 2 },
+      "JG 4": { "Stunden": 1, "Uebung": 0 }
+    },
+    {
+      "Gegenstand": "Computerpraktikum",
+      "JG 1": { "Stunden": 4, "Uebung": 0 },
+      "JG 2": { "Stunden": 4, "Uebung": 0 }
+    }
+  ]
+}
