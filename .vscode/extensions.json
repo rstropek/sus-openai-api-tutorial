@@ -6,6 +6,7 @@
         "GitHub.copilot-chat",
         "dotenv.dotenv-vscode",
         "esbenp.prettier-vscode",
-        "EditorConfig.EditorConfig"
+        "EditorConfig.EditorConfig",
+        "ms-python.python"
     ]
 }

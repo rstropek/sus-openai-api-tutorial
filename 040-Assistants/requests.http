@@ -1,0 +1,7 @@
+GET https://api.openai.com/v1/assistants
+  ?order=asc
+  &limit=3
+Content-Type: application/json
+Authorization: Bearer {{$dotenv OPENAI_API_KEY}}
+OpenAI-Beta: assistants=v1
+
