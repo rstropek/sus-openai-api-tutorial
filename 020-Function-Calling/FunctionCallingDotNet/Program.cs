@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using Azure.AI.OpenAI;
@@ -26,51 +26,49 @@ var chatCompletionOptions = new ChatCompletionsOptions(
 )
 {
   // Define the tool functions that can be called from the assistant
-  Functions =
+  Tools =
   {
-    new FunctionDefinition()
-    {
-      Name = "getUnterrichtsfaecher",
-      Description = """
-        Liefert eine Liste der Fächer, die an der Schule unterrichtet werden. Diese Funktion MUSS verwendet
-        werden, um eingegebene Namen von Fächer zu validieren.
-        """
-    },
-    new FunctionDefinition()
-    {
-      Name = "getUnterrichtsstundenProWoche",
-      Description = """
-        Liefert die Anzahl an Unterrichtsstunden pro Woche für ein bestimmtes Fach und einen
-        bestimmten Jahrgang. Wenn das Ergebnis 0 ist, wird das Fach in diesem Jahrgang nicht unterrichtet.
-        """,
-      Parameters = BinaryData.FromObjectAsJson(
-        new
-        {
-          Type = "object",
-          Properties = new
+    new ChatCompletionsFunctionToolDefinition(
+      new FunctionDefinition()
+      {
+        Name = "getUnterrichtsfaecher",
+        Description = """
+          Liefert eine Liste der Fächer, die an der Schule unterrichtet werden. Diese Funktion MUSS verwendet
+          werden, um eingegebene Namen von Fächer zu validieren.
+          """
+      }),
+    new ChatCompletionsFunctionToolDefinition(
+      new FunctionDefinition()
+      {
+        Name = "getUnterrichtsstundenProWoche",
+        Description = """
+          Liefert die Anzahl an Unterrichtsstunden pro Woche für ein bestimmtes Fach und einen
+          bestimmten Jahrgang. Wenn das Ergebnis 0 ist, wird das Fach in diesem Jahrgang nicht unterrichtet.
+          """,
+        Parameters = BinaryData.FromObjectAsJson(
+          new
           {
-            Fach = new
+            Type = "object",
+            Properties = new
             {
-              Type = "string",
-              Description = "Der Name des Faches. Erlaubt sind alle Fächer, die von der Funktion getUnterrichtsfaecher geliefert werden."
+              Fach = new
+              {
+                Type = "string",
+                Description = "Der Name des Faches. Erlaubt sind alle Fächer, die von der Funktion getUnterrichtsfaecher geliefert werden."
+              },
+              Jahrgang = new
+              {
+                Type = "integer",
+                Description = "Der Jahrgang, für den die Anzahl an Unterrichtsstunden pro Woche ermittelt werden soll. Erlaubte Werte sind 1 bis 5."
+              }
             },
-            Jahrgang = new
-            {
-              Type = "integer",
-              Description = "Der Jahrgang, für den die Anzahl an Unterrichtsstunden pro Woche ermittelt werden soll. Erlaubte Werte sind 1 bis 5."
-            }
+            Required = new[] { "fach", "jahrgang" }
           },
-          Required = new[] { "fach", "jahrgang" }
-        },
-        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
-    }
+          new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+      })
   }
 };
 
-Console.OutputEncoding = Encoding.UTF8;
-
-// Read the stundentafel.json file and deserialize it into a Stundentafel object.
-// This object will be used to answer tool calls from ChatGPT.
 var stundentafel = JsonSerializer.Deserialize<Stundentafel>(await File.ReadAllTextAsync("../stundentafel.json"));
 Debug.Assert(stundentafel != null);
 var gegenstaende = stundentafel.GegenstandStunden.Select(gs => gs.Gegenstand).Distinct();
@@ -126,11 +124,6 @@ while (true)
     if (response.Value.Choices[0].Message.ToolCalls.Any())
     {
       // We have a tool call
-
-      // NOTE that the API recently added the ability to call multiple tools in one request.
-      // That allows you to process tool calls in parallel (if that speeds up your application).
-      // This sample code does not parallelize tool calls because it would make the code more
-      // complex and therefore it would be harder to understand the OpenAI API.
 
       foreach (var toolCall in response.Value.Choices[0].Message.ToolCalls.OfType<ChatCompletionsFunctionToolCall>())
       {
