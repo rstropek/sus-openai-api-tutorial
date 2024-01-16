@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Azure.AI.OpenAI;
@@ -63,9 +65,9 @@ Console.WriteLine($"🤖: {starterMessage.Content}");
 while (true)
 {
   // Ask the user for a message. Exit program in case of empty message.
-  // A possible input would be "In manchen Fächern bin ich gut, in anderen weniger. Welche Fächer sind wichtig für diese Schule?"
+  // A possible input would be "Was ist in der Schule wichtiger, Informatik oder Rechnungswesen?"
   Console.Write("\nYou (just press enter to exit the conversation): ");
-  var userMessage = "Was ist in der Schule wichtiger, Informatik oder Rechnungswesen?"; //Console.ReadLine();
+  var userMessage = Console.ReadLine();
   if (string.IsNullOrEmpty(userMessage)) { break; }
 
   // Add the user message to the list of messages to send to the API
@@ -76,6 +78,7 @@ while (true)
   {
     repeat = false;
 
+    // Get the answer using streaming
     var response = await client.GetChatCompletionsStreamingAsync(chatCompletionOptions);
     if (response.GetRawResponse().IsError)
     {
@@ -92,22 +95,26 @@ while (true)
     {
       if (choices.ToolCallUpdate != null)
       {
+        // Get the tool update
         var update = choices.ToolCallUpdate as StreamingFunctionToolCallUpdate;
         Debug.Assert(update != null);
         if (update.ToolCallIndex != currentToolIndex && currentToolIndex != -1)
         {
+          // We have a new tool call, so add the previous one to the list
           functionCalls.Add(currentFunctionCall);
           currentFunctionCall = new();
         }
 
         currentToolIndex = update.ToolCallIndex;
 
+        // Update the current function call
         if (currentFunctionCall.Id == null && !string.IsNullOrEmpty(update.Id)) { currentFunctionCall.Id = update.Id; }
         if (currentFunctionCall.Name == null && !string.IsNullOrEmpty(update.Name)) { currentFunctionCall.Name = update.Name; }
         currentFunctionCall.ArgumentJson.Append(update.ArgumentsUpdate);
       }
       else
       {
+        // We have a regular content update, no tool call
         if (firstOutput)
         {
           Console.Write("\n🤖: ");
@@ -120,25 +127,57 @@ while (true)
 
     }
 
+    // Add the last function call to the list
     if (!functionCalls.Contains(currentFunctionCall)) { functionCalls.Add(currentFunctionCall); }
 
     if (messageBuilder.Length > 0)
     {
+      // We have a regular message, so add it to the list
       chatCompletionOptions.Messages.Add(new ChatRequestAssistantMessage(messageBuilder.ToString()));
     }
     else if (functionCalls.Count > 0)
     {
-      foreach (var f in functionCalls)
-      {
-        // TODO: Finish this implementation
-        // This is currently blocked because of https://github.com/Azure/azure-sdk-for-net/issues/41274
-      }
+      // Houston, we have a PROBLEM. We must add the a ChatResponseMessage to chatCompletionOptions.
+      // However, the constructor of ChatResponseMessage is internal, so we cannot create an instance.
+      // Workaround: Create an instance of ChatResponseMessage and use reflection to get the ChatCompletionsToolCall.
+      // For more info see https://github.com/Azure/azure-sdk-for-net/issues/41274
+      var cptc = Activator.CreateInstance(
+        typeof(ChatResponseMessage),
+        BindingFlags.NonPublic | BindingFlags.Instance,
+        null,
+        [
+          ChatRole.Assistant,
+            (string)null!,
+            (IReadOnlyList<ChatCompletionsToolCall>)functionCalls
+              .Select(f =>
+              {
+                var fc = new ChatCompletionsFunctionToolCall(f.Id, f.Name, f.ArgumentJson.ToString());
+                var p = fc.GetType().GetProperty("Type", BindingFlags.NonPublic | BindingFlags.Instance);
+                Debug.Assert(p != null);
+                p.SetValue(fc, "function");
+                return fc;
+              })
+              .Cast<ChatCompletionsToolCall>()
+              .ToList()
+              .AsReadOnly(),
+            (FunctionCall)null!,
+            (AzureChatExtensionsMessageContext)null!
+        ],
+        CultureInfo.InvariantCulture) as ChatResponseMessage;
+
+      chatCompletionOptions.Messages.Add(new ChatRequestAssistantMessage(cptc));
 
       foreach (var f in functionCalls)
       {
         if (f.Name != "getPrioritaetJeFach") { throw new NotImplementedException($"Function {f.Name} is not implemented."); }
-        var parameter = JsonSerializer.Deserialize<FunctionCallArgument>(f.ArgumentJson.ToString());
+
+        // Deserialize the function call argument
+        var parameter = JsonSerializer.Deserialize<FunctionCallArgument>(
+          f.ArgumentJson.ToString(),
+          new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         Debug.Assert(parameter != null);
+
+        // Get the priority for the given subject
         var priority = parameter.Fach switch
         {
           "Informatik" => 1,
@@ -151,6 +190,7 @@ while (true)
           _ => 0
         };
 
+        // Add the priority to the list of messages to send to the API
         var result = new ChatRequestToolMessage(JsonSerializer.Serialize(new { Prioritaet = priority }), f.Id);
         chatCompletionOptions.Messages.Add(result);
       }
