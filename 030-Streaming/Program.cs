@@ -50,7 +50,7 @@ while (true)
 
   // Build the response from the API. The response is a stream of messages. We need to enumerate over the stream.
   var messageBuilder = new StringBuilder();
-  await foreach (var choices in response.EnumerateValues())
+  await foreach (var choices in response)
   {
     Console.Write(choices.ContentUpdate);
     messageBuilder.Append(choices.ContentUpdate);
