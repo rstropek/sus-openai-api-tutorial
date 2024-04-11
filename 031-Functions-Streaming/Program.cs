@@ -137,35 +137,13 @@ while (true)
     }
     else if (functionCalls.Count > 0)
     {
-      // Houston, we have a PROBLEM. We must add the a ChatResponseMessage to chatCompletionOptions.
-      // However, the constructor of ChatResponseMessage is internal, so we cannot create an instance.
-      // Workaround: Create an instance of ChatResponseMessage and use reflection to get the ChatCompletionsToolCall.
-      // For more info see https://github.com/Azure/azure-sdk-for-net/issues/41274
-      var cptc = Activator.CreateInstance(
-        typeof(ChatResponseMessage),
-        BindingFlags.NonPublic | BindingFlags.Instance,
-        null,
-        [
-          ChatRole.Assistant,
-            (string)null!,
-            (IReadOnlyList<ChatCompletionsToolCall>)functionCalls
-              .Select(f =>
-              {
-                var fc = new ChatCompletionsFunctionToolCall(f.Id, f.Name, f.ArgumentJson.ToString());
-                var p = fc.GetType().GetProperty("Type", BindingFlags.NonPublic | BindingFlags.Instance);
-                Debug.Assert(p != null);
-                p.SetValue(fc, "function");
-                return fc;
-              })
-              .Cast<ChatCompletionsToolCall>()
-              .ToList()
-              .AsReadOnly(),
-            (FunctionCall)null!,
-            (AzureChatExtensionsMessageContext)null!
-        ],
-        CultureInfo.InvariantCulture) as ChatResponseMessage;
+      var m = new ChatRequestAssistantMessage("");
+      foreach (var call in functionCalls)
+      {
+          m.ToolCalls.Add(new ChatCompletionsFunctionToolCall(call.Id, call.Name, call.ArgumentJson.ToString()));
+      }
 
-      chatCompletionOptions.Messages.Add(new ChatRequestAssistantMessage(cptc));
+      chatCompletionOptions.Messages.Add(m);
 
       foreach (var f in functionCalls)
       {
