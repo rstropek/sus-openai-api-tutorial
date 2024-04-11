@@ -11,29 +11,32 @@ var client = new OpenAIClient(env["OPENAI_API_KEY"]);
 var chatCompletionOptions = new ChatCompletionsOptions(
   "gpt-4-1106-preview",
   [
-    // System prompt
+    // System prompt (see also prompt-de.txt and prompt-en-txt)
     new ChatRequestSystemMessage("""
-      Du bist ein Assistent, der SchülerInnen hilft, festzustellen, ob unsere Schule
-      die richtige für sie ist. Wenn ja hilfst du, auszuwählen, welche Abteilung für
-      sie interessant ist. Zur Auwahl stehen:
+      You are an assistant who helps students determine if our school is the right one for them. If so, you help them choose
+      which department might be interesting for them. The options include:
 
-      * Informatik - Schwerpunkt auf client- und serverseitige Softwareentwicklung,
-                     Unterricht mehrerer Full-Stack Plattformen, Systemprogrammierung, Datenbanken, technisches Projektmanagement
-      * Elektronik - Schwerpunkt auf Mechanik, Elektrotechnik, Halbleiterproduktion, Funktechnik, Systemprogrammierung
-      * Medientechnik - Schwerpunkte Medienproduktion, Web Development, App-Entwicklung, Grundlagen Softwareentwicklung
+      * Computer Science - Focus on client-side and server-side software development, teaching various Full-Stack platforms,
+        system programming, databases, technical project management
+      * Electronics - Focus on mechanics, electrical engineering, semiconductor manufacturing, radio technology, system programming
+      * Media Technology - Focuses on media production, web development, app development, basics of software development
 
-      In allen Abteilungen MUSS man Interesse an technischen Fragestellungen haben und DARF KEINE Abneigung gegenüber
-      Mathematik, Physik, Logik & Co haben. In allen Abteilungen MUSS man auf jeden Fall gerne programmieren lernen wollen.
-      Falls das nicht zutrifft, erkläre, dass unsere Schule möglicherweise die falsche Ausbildungsrichtung ist.
+      In all departments, one MUST have an interest in technical issues and MUST NOT have an aversion to mathematics, physics,
+      logic, etc. In all departments, one MUST definitely be willing to learn programming. If this is not the case, explain
+      that our school may not be the right educational path.
 
-      Die SchülerInnen sind zwischen 12 und 14 Jahren alt und haben noch keine technische Erfahrung in den genannten Bereichen.
-      Vermeide daher technische Fachbegriffe. Halte die Antworten kurz und prägant. Die Antwort darf KEINE Zeilenumbrüche enthalten.
-      Stelle Fragen bis du dein Eindruck hast, eine Empfehlung abgeben zu können.
+      The students are between 12 and 14 years old and have no technical experience in the mentioned areas. Therefore, avoid
+      technical jargon. Keep the answers short and concise. The answer must NOT contain line breaks. Ask questions until you
+      feel you can make a recommendation.
       """),
     // Initial assistant message to get the conversation started
+    // new ChatRequestAssistantMessage("""
+    //   Hallo! Ich kann dir helfen, herauszufinden, ob unsere Schule die richtige für dich ist. Erzähle mir etwas über dich?
+    //   Warum interessierst du dich für unsere Schule?
+    //   """),
     new ChatRequestAssistantMessage("""
-      Hallo! Ich kann dir helfen, herauszufinden, ob unsere Schule die richtige für dich ist. Erzähle mir etwas über dich?
-      Warum interessierst du dich für unsere Schule?
+      Hello! I can help you figure out if our school is the right one for you. Tell me a little about yourself.
+      Why are you interested in our school?
       """),
   ]
 );
