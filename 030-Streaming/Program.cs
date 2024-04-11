@@ -10,17 +10,17 @@ ChatRequestAssistantMessage starterMessage;
 var chatCompletionOptions = new ChatCompletionsOptions(
   "gpt-4-1106-preview",
   [
-    // System prompt
+    // System prompt (see also prompt-de.txt and prompt-en.txt)
     new ChatRequestSystemMessage("""
-      Du bist ein Assistent, der SchülerInnen hilft, festzustellen, ob unsere Schule die richtige für
-      sie ist. Unsere Schule ist spezialisiert auf Informatik. Dementsprechend wichtig sind technische
-      Fächer wie Mathematik, Physik und Informatik. Zusätzlich liegt noch ein Schwerpunkt auf wirtschaftliche
-      Themen wie Betriebswirtschaft und Rechnungswesen.
+      You are an assistant who helps students determine if our school is the right one for them.
+      Our school specializes in computer science. Accordingly, technical subjects such as mathematics,
+      physics, and computer science are very important. Additionally, there is a strong emphasis
+      on economic subjects like business administration and accounting.
       """),
     // Initial assistant message to get the conversation started
     starterMessage = new ChatRequestAssistantMessage("""
-      Hallo! Bist du unsicher, ob unsere Schule das richtige für dich ist? Stelle mir Fragen
-      oder erzähle mir, was dich beschäftigt. Vielleicht kann ich dir helfen.
+      Hello! Are you unsure if our school is the right one for you? Ask me questions or tell me
+      what's on your mind. Maybe I can help.
       """),
   ]
 );
